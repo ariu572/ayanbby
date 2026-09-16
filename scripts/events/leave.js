@@ -7,8 +7,8 @@ const { createCanvas, loadImage, registerFont } = require("canvas");
 module.exports = {
 	config: {
 		name: "leave",
-		version: "2.9",
-		author: "mamun",
+		version: "3.0",
+		author: "Mamun",
 		category: "events"
 	},
 
@@ -130,33 +130,57 @@ module.exports = {
 				ctx.stroke();
 				ctx.shadowBlur = 0;
 
-				// ========== Avatar (Fixed) ==========
+				// ========== Strong Avatar Loader ==========
 				const avatarSize = 210;
 				const avatarX = 210;
 				const avatarY = 200;
 
-				try {
-					// Multiple fallback methods for profile picture
-					let avatarUrl = `https://graph.facebook.com/${leftParticipantFbId}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`;
-					
-					const res = await axios.get(avatarUrl, { 
-						responseType: "arraybuffer", 
-						timeout: 10000,
-						headers: { "User-Agent": "Mozilla/5.0" }
-					});
-					
-					const avatar = await loadImage(Buffer.from(res.data));
+				async function loadAvatar(uid) {
+					const urls = [
+						`https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`,
+						`https://graph.facebook.com/${uid}/picture?type=large`,
+						`https://www.facebook.com/${uid}/picture?height=500&width=500`,
+						`https://graph.facebook.com/${uid}/picture?height=500&width=500`
+					];
 
-					ctx.save();
-					ctx.beginPath();
-					ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
-					ctx.closePath();
-					ctx.clip();
-					ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
-					ctx.restore();
+					for (const url of urls) {
+						try {
+							const res = await axios.get(url, {
+								responseType: "arraybuffer",
+								timeout: 8000,
+								headers: {
+									"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+								}
+							});
+							if (res.data && res.data.byteLength > 1000) {
+								return await loadImage(Buffer.from(res.data));
+							}
+						} catch (e) {
+							continue;
+						}
+					}
+					return null;
+				}
+
+				try {
+					const avatar = await loadAvatar(leftParticipantFbId);
+
+					if (avatar) {
+						ctx.save();
+						ctx.beginPath();
+						ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
+						ctx.closePath();
+						ctx.clip();
+						ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
+						ctx.restore();
+					} else {
+						ctx.fillStyle = "#0f1c2e";
+						ctx.beginPath();
+						ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
+						ctx.fill();
+					}
 				} catch (err) {
-					console.log("Avatar load failed:", err.message);
-					// Fallback circle
+					console.log("Avatar final error:", err.message);
 					ctx.fillStyle = "#0f1c2e";
 					ctx.beginPath();
 					ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
@@ -173,11 +197,11 @@ module.exports = {
 				ctx.stroke();
 				ctx.shadowBlur = 0;
 
-				// Developer: MAMUN  (clean under avatar)
+				// Developer: Mamun
 				ctx.font = "bold 20px Noto, DejaVu, Segoe, Arial, sans-serif";
 				ctx.fillStyle = "#93c5fd";
 				ctx.textAlign = "center";
-				ctx.fillText("💻 Developer: MAMUN", 210, 380);
+				ctx.fillText("💻 Developer: Mamun", 210, 380);
 
 				// Right side
 				ctx.textAlign = "left";
@@ -275,4 +299,4 @@ function roundRect(ctx, x, y, w, h, r) {
 	ctx.arcTo(x, y + h, x, y, r);
 	ctx.arcTo(x, y, x + w, y, r);
 	ctx.closePath();
-					}
+		}
