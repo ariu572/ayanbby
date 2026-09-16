@@ -1,4 +1,4 @@
-const { getTime, drive } = global.utils;
+const { getTime } = global.utils;
 const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
@@ -7,8 +7,8 @@ const { createCanvas, loadImage, registerFont } = require("canvas");
 module.exports = {
 	config: {
 		name: "leave",
-		version: "2.0",
-		author: "Rasin",
+		version: "2.5",
+		author: "mamun",
 		category: "events"
 	},
 
@@ -34,316 +34,248 @@ module.exports = {
 	},
 
 	onStart: async ({ threadsData, message, event, api, usersData, getLang }) => {
-		if (event.logMessageType == "log:unsubscribe")
-			return async function () {
-				const { threadID } = event;
-				const threadData = await threadsData.get(threadID);
-				if (!threadData.settings.sendLeaveMessage)
-					return;
-				const { leftParticipantFbId } = event.logMessageData;
-				if (leftParticipantFbId == api.getCurrentUserID())
-					return;
+		if (event.logMessageType !== "log:unsubscribe") return;
 
-				const hours = getTime("HH");
-				const threadName = threadData.threadName;
-				const userName = await usersData.getName(leftParticipantFbId);
-				const isKicked = leftParticipantFbId != event.author;
+		return async function () {
+			const { threadID } = event;
+			const threadData = await threadsData.get(threadID);
+			if (!threadData.settings.sendLeaveMessage) return;
 
-				let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
-				const session = hours <= 10 ? getLang("session1") :
-					hours <= 12 ? getLang("session2") :
-						hours <= 18 ? getLang("session3") : getLang("session4");
+			const { leftParticipantFbId } = event.logMessageData;
+			if (leftParticipantFbId == api.getCurrentUserID()) return;
 
-				leaveMessage = leaveMessage
-					.replace(/\{userName\}/g, userName)
-					.replace(/\{type\}/g, isKicked ? getLang("leaveType2") : getLang("leaveType1"))
-					.replace(/\{time\}/g, hours)
-					.replace(/\{session\}/g, session)
-					.replace(/\{threadName\}/g, threadName);
+			const hours = getTime("HH");
+			const threadName = threadData.threadName;
+
+			// ========== Better Name Getting ==========
+			let userName = null;
+
+			try {
+				userName = await usersData.getName(leftParticipantFbId);
+			} catch (e) {}
+
+			if (!userName || userName === "null" || userName === "undefined" || userName.trim() === "") {
+				try {
+					const info = await api.getUserInfo(leftParticipantFbId);
+					userName = info[leftParticipantFbId]?.name;
+				} catch (e) {}
+			}
+
+			// Final fallback
+			if (!userName || userName === "null" || userName === "undefined") {
+				userName = "Someone";
+			}
+
+			const isKicked = leftParticipantFbId != event.author;
+
+			let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
+			const session = hours <= 10 ? getLang("session1") :
+				hours <= 12 ? getLang("session2") :
+					hours <= 18 ? getLang("session3") : getLang("session4");
+
+			leaveMessage = leaveMessage
+				.replace(/\{userName\}/g, userName)
+				.replace(/\{type\}/g, isKicked ? getLang("leaveType2") : getLang("leaveType1"))
+				.replace(/\{time\}/g, hours)
+				.replace(/\{session\}/g, session)
+				.replace(/\{threadName\}/g, threadName);
+
+			try {
+				const cacheDir = path.join(__dirname, "cache");
+				await fs.ensureDir(cacheDir);
+
+				// Font
+				const fontPaths = [
+					{ path: "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", family: "Noto" },
+					{ path: "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", family: "DejaVu" },
+					{ path: "C:\\Windows\\Fonts\\segoeui.ttf", family: "Segoe" },
+					{ path: "C:\\Windows\\Fonts\\arial.ttf", family: "Arial" }
+				];
+				for (const f of fontPaths) {
+					try {
+						if (fs.existsSync(f.path)) {
+							registerFont(f.path, { family: f.family });
+							break;
+						}
+					} catch {}
+				}
+
+				const threadInfo = await api.getThreadInfo(threadID);
+				const memberCount = threadInfo.participantIDs.length;
+
+				// ===== Canvas (Blue Theme) =====
+				const canvas = createCanvas(1100, 520);
+				const ctx = canvas.getContext("2d");
+
+				const bg = ctx.createRadialGradient(550, 260, 50, 550, 260, 700);
+				bg.addColorStop(0, "#0a1628");
+				bg.addColorStop(0.5, "#07101c");
+				bg.addColorStop(1, "#040a12");
+				ctx.fillStyle = bg;
+				ctx.fillRect(0, 0, 1100, 520);
+
+				ctx.globalAlpha = 0.05;
+				ctx.font = "bold 180px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#3b82f6";
+				ctx.textAlign = "center";
+				ctx.fillText("LEAVE", 550, 310);
+				ctx.globalAlpha = 1;
+
+				// Left card
+				ctx.fillStyle = "rgba(10, 20, 40, 0.9)";
+				roundRect(ctx, 40, 40, 340, 440, 28);
+				ctx.fill();
+
+				ctx.strokeStyle = "#3b82f6";
+				ctx.lineWidth = 3;
+				ctx.shadowColor = "#3b82f6";
+				ctx.shadowBlur = 18;
+				roundRect(ctx, 40, 40, 340, 440, 28);
+				ctx.stroke();
+				ctx.shadowBlur = 0;
+
+				// Avatar
+				const avatarSize = 210;
+				const avatarX = 210;
+				const avatarY = 200;
 
 				try {
-					const cacheDir = path.join(__dirname, "cache");
-					await fs.ensureDir(cacheDir);
+					const avatarUrl = `https://graph.facebook.com/${leftParticipantFbId}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`;
+					const res = await axios.get(avatarUrl, { responseType: "arraybuffer", timeout: 8000 });
+					const avatar = await loadImage(Buffer.from(res.data));
 
-					// Register fonts with Unicode support
-					try {
-						const fontPaths = [
-							{ path: 'C:\\Windows\\Fonts\\seguisb.ttf', family: 'Segoe' },
-							{ path: 'C:\\Windows\\Fonts\\segoeui.ttf', family: 'Segoe' },
-							{ path: 'C:\\Windows\\Fonts\\arialuni.ttf', family: 'ArialUni' },
-							{ path: 'C:\\Windows\\Fonts\\msyh.ttc', family: 'MSYahei' },
-							{ path: '/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf', family: 'Noto' },
-							{ path: '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', family: 'DejaVu' }
-						];
-
-						let fontRegistered = false;
-						for (const font of fontPaths) {
-							try {
-								if (fs.existsSync(font.path)) {
-									registerFont(font.path, { family: font.family });
-									fontRegistered = true;
-									break;
-								}
-							} catch (e) {
-								continue;
-							}
-						}
-					} catch (fontErr) {
-						console.log("Font registration error:", fontErr.message);
-					}
-
-					const threadInfo = await api.getThreadInfo(threadID);
-					const memberCount = threadInfo.participantIDs.length;
-
-					const canvas = createCanvas(1000, 600);
-					const ctx = canvas.getContext('2d');
-
-					// Background gradient (darker/sadder tones)
-					const bgGradient = ctx.createRadialGradient(500, 300, 100, 500, 300, 600);
-					bgGradient.addColorStop(0, '#4a4a6a');
-					bgGradient.addColorStop(0.5, '#3a3a52');
-					bgGradient.addColorStop(1, '#2a2a3a');
-					ctx.fillStyle = bgGradient;
-					ctx.fillRect(0, 0, 1000, 600);
-
-					// Bubbles with darker tones
-					ctx.globalAlpha = 0.1;
-					const bubbles = [
-						{ x: 150, y: 100, r: 80 },
-						{ x: 850, y: 150, r: 120 },
-						{ x: 200, y: 450, r: 60 },
-						{ x: 800, y: 500, r: 90 },
-						{ x: 500, y: 100, r: 70 }
-					];
-					bubbles.forEach(b => {
-						const bubbleGrad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-						bubbleGrad.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
-						bubbleGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-						ctx.fillStyle = bubbleGrad;
-						ctx.beginPath();
-						ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-						ctx.fill();
-					});
-					ctx.globalAlpha = 1;
-
-					// Wave patterns
-					ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-					ctx.lineWidth = 3;
-					for (let i = 0; i < 5; i++) {
-						ctx.beginPath();
-						for (let x = 0; x < 1000; x += 20) {
-							const y = 100 + i * 100 + Math.sin(x / 50 + i) * 30;
-							if (x === 0) ctx.moveTo(x, y);
-							else ctx.lineTo(x, y);
-						}
-						ctx.stroke();
-					}
-
-					// Main card background
-					ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-					ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-					ctx.lineWidth = 3;
+					ctx.save();
 					ctx.beginPath();
-					ctx.moveTo(100, 120);
-					ctx.lineTo(900, 80);
-					ctx.quadraticCurveTo(950, 80, 950, 130);
-					ctx.lineTo(950, 500);
-					ctx.quadraticCurveTo(950, 550, 900, 550);
-					ctx.lineTo(100, 520);
-					ctx.quadraticCurveTo(50, 520, 50, 470);
-					ctx.lineTo(50, 170);
-					ctx.quadraticCurveTo(50, 120, 100, 120);
+					ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
 					ctx.closePath();
-					ctx.fill();
-					ctx.stroke();
-
-					// Top strip (gray/sad colors)
-					const stripGradient = ctx.createLinearGradient(0, 0, 1000, 600);
-					stripGradient.addColorStop(0, '#708090');
-					stripGradient.addColorStop(0.5, '#556B2F');
-					stripGradient.addColorStop(1, '#483D8B');
-					ctx.fillStyle = stripGradient;
+					ctx.clip();
+					ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
+					ctx.restore();
+				} catch {
+					ctx.fillStyle = "#0f1c2e";
 					ctx.beginPath();
-					ctx.moveTo(50, 120);
-					ctx.lineTo(950, 80);
-					ctx.lineTo(950, 100);
-					ctx.lineTo(50, 140);
-					ctx.closePath();
+					ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
 					ctx.fill();
-
-					try {
-						const avatarUrl = `https://arshi-facebook-pp.vercel.app/api/pp?uid=${leftParticipantFbId}`;
-						const avatarResponse = await axios.get(avatarUrl, { responseType: 'arraybuffer' });
-						const avatar = await loadImage(Buffer.from(avatarResponse.data));
-
-						const hexSize = 110;
-						const hexX = 250;
-						const hexY = 300;
-
-						ctx.save();
-						ctx.beginPath();
-						for (let i = 0; i < 6; i++) {
-							const angle = (Math.PI / 3) * i;
-							const x = hexX + hexSize * Math.cos(angle);
-							const y = hexY + hexSize * Math.sin(angle);
-							if (i === 0) ctx.moveTo(x, y);
-							else ctx.lineTo(x, y);
-						}
-						ctx.closePath();
-						ctx.clip();
-						ctx.drawImage(avatar, hexX - hexSize, hexY - hexSize, hexSize * 2, hexSize * 2);
-						ctx.restore();
-
-						// Hexagon border (gray)
-						ctx.shadowColor = '#708090';
-						ctx.shadowBlur = 20;
-						ctx.strokeStyle = '#708090';
-						ctx.lineWidth = 5;
-						ctx.beginPath();
-						for (let i = 0; i < 6; i++) {
-							const angle = (Math.PI / 3) * i;
-							const x = hexX + hexSize * Math.cos(angle);
-							const y = hexY + hexSize * Math.sin(angle);
-							if (i === 0) ctx.moveTo(x, y);
-							else ctx.lineTo(x, y);
-						}
-						ctx.closePath();
-						ctx.stroke();
-						ctx.shadowBlur = 0;
-
-						// Outer hexagon ring
-						ctx.strokeStyle = 'rgba(112, 128, 144, 0.6)';
-						ctx.lineWidth = 3;
-						ctx.beginPath();
-						for (let i = 0; i < 6; i++) {
-							const angle = (Math.PI / 3) * i;
-							const x = hexX + (hexSize + 15) * Math.cos(angle);
-							const y = hexY + (hexSize + 15) * Math.sin(angle);
-							if (i === 0) ctx.moveTo(x, y);
-							else ctx.lineTo(x, y);
-						}
-						ctx.closePath();
-						ctx.stroke();
-
-					} catch (err) {
-						const hexSize = 110;
-						const hexX = 250;
-						const hexY = 300;
-						ctx.fillStyle = '#2a2a3e';
-						ctx.beginPath();
-						for (let i = 0; i < 6; i++) {
-							const angle = (Math.PI / 3) * i;
-							const x = hexX + hexSize * Math.cos(angle);
-							const y = hexY + hexSize * Math.sin(angle);
-							if (i === 0) ctx.moveTo(x, y);
-							else ctx.lineTo(x, y);
-						}
-						ctx.closePath();
-						ctx.fill();
-					}
-
-					// "GOODBYE" text
-					ctx.fillStyle = 'rgba(112, 128, 144, 0.2)';
-					ctx.fillRect(450, 150, 480, 80);
-
-					ctx.shadowColor = '#708090';
-					ctx.shadowBlur = 15;
-					ctx.font = 'bold 56px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					const goodbyeGrad = ctx.createLinearGradient(450, 180, 900, 180);
-					goodbyeGrad.addColorStop(0, '#ffffff');
-					goodbyeGrad.addColorStop(1, '#708090');
-					ctx.fillStyle = goodbyeGrad;
-					ctx.textAlign = 'left';
-					ctx.fillText('GOODBYE', 480, 210);
-					ctx.shadowBlur = 0;
-
-					// User name section
-					ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-					ctx.fillRect(450, 250, 480, 90);
-
-					ctx.font = 'bold 42px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					const nameGrad = ctx.createLinearGradient(450, 280, 900, 280);
-					nameGrad.addColorStop(0, '#9370DB');
-					nameGrad.addColorStop(0.5, '#708090');
-					nameGrad.addColorStop(1, '#556B2F');
-					ctx.fillStyle = nameGrad;
-
-					let displayName = userName;
-					ctx.font = 'bold 38px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					if (ctx.measureText(displayName).width > 440) {
-						while (ctx.measureText(displayName + '...').width > 440) {
-							displayName = displayName.slice(0, -1);
-						}
-						displayName += '...';
-					}
-					ctx.fillText(displayName, 480, 295);
-
-					ctx.font = 'italic 22px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					ctx.fillStyle = '#ffffff';
-					ctx.fillText(isKicked ? 'Was Kicked From Group' : 'Left The Group', 480, 325);
-
-					// Total Members box
-					ctx.fillStyle = 'rgba(112, 128, 144, 0.15)';
-					ctx.fillRect(450, 360, 200, 60);
-					ctx.strokeStyle = 'rgba(112, 128, 144, 0.4)';
-					ctx.lineWidth = 2;
-					ctx.strokeRect(450, 360, 200, 60);
-
-					ctx.font = 'bold 12px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					ctx.fillStyle = '#708090';
-					ctx.fillText('REMAINING MEMBERS', 470, 380);
-
-					ctx.font = 'bold 20px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					ctx.fillStyle = '#ffffff';
-					ctx.fillText(`👥 ${memberCount}`, 470, 405);
-
-					ctx.strokeStyle = 'rgba(112, 128, 144, 0.5)';
-					ctx.lineWidth = 3;
-					ctx.beginPath();
-					ctx.moveTo(450, 450);
-					ctx.lineTo(930, 450);
-					ctx.stroke();
-
-					const emojis = [
-						{ x: 460, y: 480, emoji: '💔', size: 20 },
-						{ x: 700, y: 490, emoji: '🫶🏻', size: 16 },
-						{ x: 900, y: 475, emoji: '⭐', size: 18 }
-					];
-
-					emojis.forEach(item => {
-						ctx.font = `${item.size}px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif`;
-						ctx.fillStyle = '#ffffff';
-						ctx.fillText(item.emoji, item.x, item.y);
-					});
-
-					ctx.font = 'bold 22px Segoe, Noto, ArialUni, MSYahei, DejaVu, sans-serif';
-					const footerGrad = ctx.createLinearGradient(450, 515, 800, 515);
-					footerGrad.addColorStop(0, '#9370DB');
-					footerGrad.addColorStop(1, '#708090');
-					ctx.fillStyle = footerGrad;
-					ctx.fillText("We'll Miss You! Take Care 💔", 450, 515);
-
-					const cachePath = path.join(cacheDir, `leave_${leftParticipantFbId}_${Date.now()}.png`);
-					const buffer = canvas.toBuffer('image/png');
-					await fs.writeFile(cachePath, buffer);
-
-					message.reply({
-						body: leaveMessage,
-						attachment: fs.createReadStream(cachePath)
-					}, () => {
-						try {
-							if (fs.existsSync(cachePath)) {
-								fs.unlinkSync(cachePath);
-							}
-						} catch (err) {
-							console.error("Error cleaning cache:", err);
-						}
-					});
-
-				} catch (error) {
-					console.error("Error generating leave card:", error);
-					message.reply(leaveMessage);
 				}
-			};
+
+				ctx.strokeStyle = "#3b82f6";
+				ctx.lineWidth = 6;
+				ctx.shadowColor = "#3b82f6";
+				ctx.shadowBlur = 14;
+				ctx.beginPath();
+				ctx.arc(avatarX, avatarY, avatarSize / 2 + 4, 0, Math.PI * 2);
+				ctx.stroke();
+				ctx.shadowBlur = 0;
+
+				// MEMBER LEFT
+				ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+				roundRect(ctx, 95, 370, 210, 48, 24);
+				ctx.fill();
+
+				ctx.font = "bold 18px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#93c5fd";
+				ctx.textAlign = "center";
+				ctx.fillText("👤  MEMBER LEFT", 200, 400);
+
+				// Right side
+				ctx.textAlign = "left";
+				ctx.font = "bold 58px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#ffffff";
+				ctx.shadowColor = "rgba(59, 130, 246, 0.45)";
+				ctx.shadowBlur = 12;
+				ctx.fillText("GOODBYE", 430, 110);
+				ctx.shadowBlur = 0;
+
+				ctx.font = "bold 36px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#f1f5f9";
+				let displayName = userName;
+				if (ctx.measureText(displayName).width > 520) {
+					while (ctx.measureText(displayName + "...").width > 520) {
+						displayName = displayName.slice(0, -1);
+					}
+					displayName += "...";
+				}
+				ctx.fillText(displayName, 430, 165);
+
+				ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+				roundRect(ctx, 430, 195, 520, 55, 14);
+				ctx.fill();
+				ctx.strokeStyle = "rgba(59, 130, 246, 0.3)";
+				ctx.lineWidth = 1.5;
+				roundRect(ctx, 430, 195, 520, 55, 14);
+				ctx.stroke();
+
+				ctx.font = "22px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#e2e8f0";
+				ctx.fillText(isKicked ? "💔  Was kicked from the group." : "💔  Has left the group.", 455, 230);
+
+				ctx.fillStyle = "rgba(59, 130, 246, 0.08)";
+				roundRect(ctx, 430, 270, 520, 50, 12);
+				ctx.fill();
+
+				ctx.font = "15px monospace";
+				ctx.fillStyle = "#93c5fd";
+				ctx.globalAlpha = 0.9;
+				ctx.fillText("01F 01F 01F 01F 01F 01F 01F 01F 01F 01F 01F ...", 450, 302);
+				ctx.globalAlpha = 1;
+
+				ctx.fillStyle = "#3b82f6";
+				roundRect(ctx, 430, 350, 180, 55, 14);
+				ctx.fill();
+
+				ctx.font = "bold 22px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#ffffff";
+				ctx.textAlign = "center";
+				ctx.fillText(`👤  ${memberCount} LEFT`, 520, 385);
+
+				ctx.fillStyle = "rgba(255, 255, 255, 0.07)";
+				roundRect(ctx, 630, 350, 320, 55, 14);
+				ctx.fill();
+				ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+				ctx.lineWidth = 1.5;
+				roundRect(ctx, 630, 350, 320, 55, 14);
+				ctx.stroke();
+
+				const now = new Date();
+				const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+				const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
+				ctx.font = "18px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "#e2e8f0";
+				ctx.fillText(`🕒  ${timeStr}  ·  ${dateStr}`, 790, 385);
+
+				ctx.font = "14px Noto, DejaVu, Segoe, Arial, sans-serif";
+				ctx.fillStyle = "rgba(255,255,255,0.4)";
+				ctx.textAlign = "left";
+				ctx.fillText("✦ DI-AB-LO BOT LEAVE MSG", 430, 460);
+
+				const cachePath = path.join(cacheDir, `leave_\( {leftParticipantFbId}_ \){Date.now()}.png`);
+				const buffer = canvas.toBuffer("image/png");
+				await fs.writeFile(cachePath, buffer);
+
+				message.reply({
+					body: leaveMessage,
+					attachment: fs.createReadStream(cachePath)
+				}, () => {
+					try { fs.unlinkSync(cachePath); } catch {}
+				});
+
+			} catch (err) {
+				console.error("Leave card error:", err);
+				message.reply(leaveMessage);
+			}
+		};
 	}
 };
+
+function roundRect(ctx, x, y, w, h, r) {
+	if (w < 2 * r) r = w / 2;
+	if (h < 2 * r) r = h / 2;
+	ctx.beginPath();
+	ctx.moveTo(x + r, y);
+	ctx.arcTo(x + w, y, x + w, y + h, r);
+	ctx.arcTo(x + w, y + h, x, y + h, r);
+	ctx.arcTo(x, y + h, x, y, r);
+	ctx.arcTo(x, y, x + w, y, r);
+	ctx.closePath();
+}
