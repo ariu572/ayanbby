@@ -95,11 +95,11 @@ module.exports = {
   }
 };
 
-const ACCESS_TOKEN = "6628568379%7Cc1e620fa708a1d2527f5e94678934e26";
+const ACCESS_TOKEN = "6628568379%7Cc1e620fa708a1d5696fb991c1bde566";
 
 async function downloadHighQualityProfile(userID) {
   try {
-    const url = `https://graph.facebook.com/${leftParticipantFbId}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`;
+    const url = `https://graph.facebook.com/${userID}/picture?width=500&height=500&access_token=${ACCESS_TOKEN}`;
     const res = await axios({
       method: "GET",
       url,
