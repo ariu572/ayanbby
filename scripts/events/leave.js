@@ -7,7 +7,7 @@ const { createCanvas, loadImage, registerFont } = require("canvas");
 module.exports = {
 	config: {
 		name: "leave",
-		version: "2.5",
+		version: "2.9",
 		author: "mamun",
 		category: "events"
 	},
@@ -47,9 +47,8 @@ module.exports = {
 			const hours = getTime("HH");
 			const threadName = threadData.threadName;
 
-			// ========== Better Name Getting ==========
+			// ========== Name Getting ==========
 			let userName = null;
-
 			try {
 				userName = await usersData.getName(leftParticipantFbId);
 			} catch (e) {}
@@ -60,8 +59,6 @@ module.exports = {
 					userName = info[leftParticipantFbId]?.name;
 				} catch (e) {}
 			}
-
-			// Final fallback
 			if (!userName || userName === "null" || userName === "undefined") {
 				userName = "Someone";
 			}
@@ -84,7 +81,6 @@ module.exports = {
 				const cacheDir = path.join(__dirname, "cache");
 				await fs.ensureDir(cacheDir);
 
-				// Font
 				const fontPaths = [
 					{ path: "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf", family: "Noto" },
 					{ path: "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", family: "DejaVu" },
@@ -103,7 +99,7 @@ module.exports = {
 				const threadInfo = await api.getThreadInfo(threadID);
 				const memberCount = threadInfo.participantIDs.length;
 
-				// ===== Canvas (Blue Theme) =====
+				// ===== Canvas =====
 				const canvas = createCanvas(1100, 520);
 				const ctx = canvas.getContext("2d");
 
@@ -134,14 +130,21 @@ module.exports = {
 				ctx.stroke();
 				ctx.shadowBlur = 0;
 
-				// Avatar
+				// ========== Avatar (Fixed) ==========
 				const avatarSize = 210;
 				const avatarX = 210;
 				const avatarY = 200;
 
 				try {
-					const avatarUrl = `https://graph.facebook.com/${leftParticipantFbId}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`;
-					const res = await axios.get(avatarUrl, { responseType: "arraybuffer", timeout: 8000 });
+					// Multiple fallback methods for profile picture
+					let avatarUrl = `https://graph.facebook.com/${leftParticipantFbId}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d2527f5e94678934e26`;
+					
+					const res = await axios.get(avatarUrl, { 
+						responseType: "arraybuffer", 
+						timeout: 10000,
+						headers: { "User-Agent": "Mozilla/5.0" }
+					});
+					
 					const avatar = await loadImage(Buffer.from(res.data));
 
 					ctx.save();
@@ -151,13 +154,16 @@ module.exports = {
 					ctx.clip();
 					ctx.drawImage(avatar, avatarX - avatarSize / 2, avatarY - avatarSize / 2, avatarSize, avatarSize);
 					ctx.restore();
-				} catch {
+				} catch (err) {
+					console.log("Avatar load failed:", err.message);
+					// Fallback circle
 					ctx.fillStyle = "#0f1c2e";
 					ctx.beginPath();
 					ctx.arc(avatarX, avatarY, avatarSize / 2, 0, Math.PI * 2);
 					ctx.fill();
 				}
 
+				// Blue ring
 				ctx.strokeStyle = "#3b82f6";
 				ctx.lineWidth = 6;
 				ctx.shadowColor = "#3b82f6";
@@ -167,15 +173,11 @@ module.exports = {
 				ctx.stroke();
 				ctx.shadowBlur = 0;
 
-				// MEMBER LEFT
-				ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
-				roundRect(ctx, 95, 370, 210, 48, 24);
-				ctx.fill();
-
-				ctx.font = "bold 18px Noto, DejaVu, Segoe, Arial, sans-serif";
+				// Developer: MAMUN  (clean under avatar)
+				ctx.font = "bold 20px Noto, DejaVu, Segoe, Arial, sans-serif";
 				ctx.fillStyle = "#93c5fd";
 				ctx.textAlign = "center";
-				ctx.fillText("👤  MEMBER LEFT", 200, 400);
+				ctx.fillText("💻 Developer: MAMUN", 210, 380);
 
 				// Right side
 				ctx.textAlign = "left";
@@ -244,11 +246,6 @@ module.exports = {
 				ctx.fillStyle = "#e2e8f0";
 				ctx.fillText(`🕒  ${timeStr}  ·  ${dateStr}`, 790, 385);
 
-				ctx.font = "14px Noto, DejaVu, Segoe, Arial, sans-serif";
-				ctx.fillStyle = "rgba(255,255,255,0.4)";
-				ctx.textAlign = "left";
-				ctx.fillText("✦ DI-AB-LO BOT LEAVE MSG", 430, 460);
-
 				const cachePath = path.join(cacheDir, `leave_\( {leftParticipantFbId}_ \){Date.now()}.png`);
 				const buffer = canvas.toBuffer("image/png");
 				await fs.writeFile(cachePath, buffer);
@@ -278,4 +275,4 @@ function roundRect(ctx, x, y, w, h, r) {
 	ctx.arcTo(x, y + h, x, y, r);
 	ctx.arcTo(x, y, x + w, y, r);
 	ctx.closePath();
-}
+					}
