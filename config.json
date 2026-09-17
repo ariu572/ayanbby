@@ -1,7 +1,7 @@
 {
   "facebookAccount": {
-    "email": "",
-    "password": "",
+    "email": "facebookmd446@gmail.com",
+    "password": "mamun143#@",
     "2FASecret": "",
     "i_user": "",
     "proxy": null,
@@ -12,7 +12,7 @@
   "antiInbox": false,
   "language": "en",
   "notesLanguage": "change language using ISO 639-1 code",
-  "nickNameBot": " ⏤͟͟͞͞ ☻ 𝗬𝗢𝗨𝗥 𝗕𝗕𝗭 💌",
+  "nickNameBot": " ᴍᴀᴍᴜɴ ʙʙ'ᴢ 🪄💌",
   "prefix": "-",
   "noPrefix": {
     "enable": true,
@@ -152,7 +152,7 @@
     "updatePresence": true,
     "listenTyping": true,
     "logLevel": "error",
-    "selfListen": true,
+    "selfListen": false,
     "selfListenEvent": true,
     "autoMarkDelivery": false,
     "autoReconnect": true,
