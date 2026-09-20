@@ -1,106 +1,133 @@
-const fs = require("fs");
+const fs = require("fs-extra");
 const axios = require("axios");
 const path = require("path");
+const { pipeline } = require("stream/promises");
 
 const API_BASE = "https://exxdev.onrender.com/api";
 
 async function downloadVideo(url) {
- const res = await axios.get(`${API_BASE}/alldownload`, {
- params: { url },
- timeout: 30000
- });
+  // 1. Get download info
+  const res = await axios.get(`${API_BASE}/alldownload`, {
+    params: { url },
+    timeout: 20000
+  });
 
- if (!res.data?.success) throw new Error(res.data?.error || "Failed");
+  if (!res.data?.success) throw new Error(res.data?.error || "Failed to get video info");
 
- const data = res.data;
- const title = data.title || "Video";
- const videoUrl = data.video_url || data.hd || data.sd;
+  const data = res.data;
+  const title = data.title || "Video";
 
- if (!videoUrl) throw new Error("No video URL found");
+  // Priority: highest quality available
+  const videoUrl = data.hd || data.video_url || data.sd || data.url;
+  if (!videoUrl) throw new Error("No video URL found");
 
- const filePath = path.join("/tmp", `autolink_${Date.now()}.mp4`);
- const fileRes = await axios.get(videoUrl, {
- responseType: "arraybuffer",
- timeout: 120000,
- headers: {
- "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
- "Referer": "https://www.facebook.com/"
- }
- });
+  const filePath = path.join(__dirname, "cache", `autolink_\( {Date.now()}_ \){Math.random().toString(36).slice(2, 7)}.mp4`);
+  await fs.ensureDir(path.join(__dirname, "cache"));
 
- fs.writeFileSync(filePath, Buffer.from(fileRes.data));
- return { title, filePath };
+  // 2. Stream download (much faster + low memory)
+  const response = await axios({
+    method: "GET",
+    url: videoUrl,
+    responseType: "stream",
+    timeout: 90000,
+    maxRedirects: 5,
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "*/*",
+      "Accept-Encoding": "identity",
+      "Referer": "https://www.facebook.com/",
+      "Origin": "https://www.facebook.com"
+    }
+  });
+
+  const writer = fs.createWriteStream(filePath);
+  await pipeline(response.data, writer);
+
+  return { title, filePath };
 }
 
 module.exports = {
- config: {
- name: "autolink",
- version: "1.4",
- author: "MOHAMMAD AKASH",
- countDown: 5,
- role: 0,
- shortDescription: "Auto-download & send videos silently (no messages)",
- category: "media",
- },
+  config: {
+    name: "autolink",
+    version: "1.6",
+    author: "Akash edit by MAMUN",
+    countDown: 5,
+    role: 0,
+    shortDescription: {
+      en: "Auto download videos from links (Fast)"
+    },
+    longDescription: {
+      en: "Automatically detects and downloads videos from links very fast"
+    },
+    category: "media",
+    guide: {
+      en: "Just send any video link"
+    }
+  },
 
- onStart: async function () {},
+  onStart: async function () {},
 
- onChat: async function ({ api, event }) {
- const threadID = event.threadID;
- const messageID = event.messageID;
- const message = event.body || "";
+  onChat: async function ({ api, event }) {
+    const { threadID, messageID, body } = event;
+    if (!body) return;
 
- const linkMatches = message.match(/(https?:\/\/[^\s]+)/g);
- if (!linkMatches || linkMatches.length === 0) return;
+    const linkMatches = body.match(/(https?:\/\/[^\s]+)/g);
+    if (!linkMatches) return;
 
- const uniqueLinks = [...new Set(linkMatches)];
+    const uniqueLinks = [...new Set(linkMatches)];
 
- api.setMessageReaction("⏳", messageID, () => {}, true);
+    // Only video platforms
+    const videoLinks = uniqueLinks.filter(url =>
+      /facebook\.com|fb\.watch|fb\.com|tiktok\.com|vm\.tiktok|instagram\.com|youtu\.be|youtube\.com|twitter\.com|x\.com/i.test(url)
+    );
 
- let successCount = 0;
- let failCount = 0;
+    if (videoLinks.length === 0) return;
 
- for (const url of uniqueLinks) {
- try {
- const { title, filePath } = await downloadVideo(url);
- if (!filePath || !fs.existsSync(filePath)) throw new Error();
+    api.setMessageReaction("⏳", messageID, () => {}, true);
 
- const stats = fs.statSync(filePath);
- const fileSizeInMB = stats.size / (1024 * 1024);
+    let success = 0;
+    let fail = 0;
 
- if (fileSizeInMB > 25) {
- fs.unlinkSync(filePath);
- failCount++;
- continue;
- }
+    // Parallel download (max 2 at a time to avoid overload)
+    const chunks = [];
+    for (let i = 0; i < videoLinks.length; i += 2) {
+      chunks.push(videoLinks.slice(i, i + 2));
+    }
 
- await api.sendMessage(
- {
- body:
-`𝐇𝐞𝐫𝐞'𝐬 𝐲𝐨𝐮𝐫 𝐕𝐢𝐝𝐞𝐨 𝐁𝐚𝐛𝐲 <😘
+    for (const chunk of chunks) {
+      await Promise.all(
+        chunk.map(async (url) => {
+          try {
+            const { title, filePath } = await downloadVideo(url);
 
-• 𝐀𝐝𝐦𝐢𝐧: 𝗠𝗔𝗠𝗨𝗡
-==========================
+            if (!fs.existsSync(filePath)) throw new Error("File missing");
 
- 🎬 ${title || "Video File"}
- 📦 ${fileSizeInMB.toFixed(2)} MB`,
- attachment: fs.createReadStream(filePath)
- },
- threadID,
- () => fs.unlinkSync(filePath)
- );
+            const sizeMB = fs.statSync(filePath).size / (1024 * 1024);
+            if (sizeMB > 25) {
+              fs.unlinkSync(filePath);
+              fail++;
+              return;
+            }
 
- successCount++;
+            await api.sendMessage(
+              {
+                body: `𝐇𝐞𝐫𝐞'𝐬 𝐲𝐨𝐮𝐫 𝐕𝐢𝐝𝐞𝐨 𝐁𝐚𝐛𝐲 <😘\n\n• 𝐀𝐝𝐦𝐢𝐧: 𝗠𝗔𝗠𝗨𝗡\n==========================\n\n🎬 ${title}\n📦 ${sizeMB.toFixed(2)} MB`,
+                attachment: fs.createReadStream(filePath)
+              },
+              threadID,
+              () => fs.unlink(filePath).catch(() => {})
+            );
 
- } catch {
- failCount++;
- }
- }
+            success++;
+          } catch (err) {
+            console.error("Autolink Error:", err.message);
+            fail++;
+          }
+        })
+      );
+    }
 
- const finalReaction =
- successCount > 0 && failCount === 0 ? "✅" :
- successCount > 0 ? "⚠️" : "❌";
-
- api.setMessageReaction(finalReaction, messageID, () => {}, true);
- }
+    const reaction = success > 0 && fail === 0 ? "✅" : success > 0 ? "⚠️" : "❌";
+    api.setMessageReaction(reaction, messageID, () => {}, true);
+  }
 };
