@@ -4,44 +4,30 @@ const path = require("path");
 module.exports = {
   config: {
     name: "file2",
-    aliases: ["files2", "getfile"],
-    version: "1.0",
+    aliases: ["files2", "fm"],
+    version: "1.3",
     author: "𝗧𝗠 ^〲𝗠𝗔𝗠𝗨𝗡ツ࿐ ⁰⁰⁷",
     countDown: 5,
-    role: 0,
+    role: 2,
     shortDescription: {
-      en: "Show all command files & get code by number"
+      en: "Browse command files & get code by number"
     },
     longDescription: {
-      en: "List all command files with number, reply with number to get the code"
+      en: "Show numbered list of command files. Reply with number to get the code."
     },
     category: "owner",
     guide: {
-      en: "{pn}\n{pn} <command name>\nReply: <number>\nReply: <number> raw\nReply: <number> text"
+      en: "{pn}\nReply with number to get the file code"
     }
   },
 
-  onStart: async function ({ api, event, args, message }) {
+  onStart: async function ({ api, event }) {
     const { threadID, messageID, senderID } = event;
-    const cmdsPath = path.join(__dirname);
+    const cmdsPath = __dirname;
 
     try {
-      // Direct command name dile
-      if (args[0]) {
-        const cmdName = args[0].toLowerCase().replace(/\.js$/, "");
-        const filePath = path.join(cmdsPath, cmdName + ".js");
-
-        if (!fs.existsSync(filePath)) {
-          return api.sendMessage(`❌ "${cmdName}.js" file paoa jayni`, threadID, messageID);
-        }
-
-        const code = fs.readFileSync(filePath, "utf8");
-        return api.sendMessage(`📄 File: \( {cmdName}.js\n\n \){code}`, threadID, messageID);
-      }
-
-      // List banano
       const files = fs.readdirSync(cmdsPath)
-        .filter(file => file.endsWith(".js"))
+        .filter(f => f.endsWith(".js"))
         .sort();
 
       if (files.length === 0) {
@@ -49,20 +35,18 @@ module.exports = {
       }
 
       let body = `📁 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗙𝗶𝗹𝗲𝘀: ${files.length}\n\n`;
-      files.forEach((file, index) => {
-        body += `${index + 1}. ${file}\n`;
+      files.forEach((file, i) => {
+        body += `${i + 1}. ${file}\n`;
       });
-
-      body += `\n➤ Reply kore number din (Example: 5)\n➤ Extra option: 5 raw  |  5 text`;
+      body += `\n➤ Reply kore number din (Example: 5)`;
 
       api.sendMessage(body, threadID, (err, info) => {
         if (err) return;
-
         global.GoatBot.onReply.set(info.messageID, {
           commandName: this.config.name,
           messageID: info.messageID,
           author: senderID,
-          files: files
+          files
         });
       }, messageID);
 
@@ -77,9 +61,7 @@ module.exports = {
 
     if (senderID !== author) return;
 
-    const args = body.trim().split(/\s+/);
-    const number = parseInt(args[0]);
-    const type = (args[1] || "").toLowerCase();
+    const number = parseInt(body.trim());
 
     if (isNaN(number) || number < 1 || number > files.length) {
       return api.sendMessage(`❌ Sothik number din (1 - ${files.length})`, threadID, messageID);
@@ -90,20 +72,8 @@ module.exports = {
 
     try {
       const code = fs.readFileSync(filePath, "utf8");
+      const msg = `📄 𝗙𝗶𝗹𝗲: (\( {fileName})\n\n \){code}`;
 
-      let msg = "";
-
-      if (type === "raw") {
-        msg = code; // pure raw code
-      } 
-      else if (type === "text") {
-        msg = `📄 𝗙𝗶𝗹𝗲: \( {fileName}\n\n \){code}`;
-      } 
-      else {
-        msg = `📄 𝗙𝗶𝗹𝗲: \( {fileName}\n\n \){code}`;
-      }
-
-      // Code too long hole split kore pathabe
       if (msg.length > 15000) {
         const chunks = msg.match(/[\s\S]{1,15000}/g) || [];
         for (const chunk of chunks) {
@@ -114,7 +84,7 @@ module.exports = {
       }
 
     } catch (err) {
-      api.sendMessage("❌ File porte problem: " + err.message, threadID, messageID);
+      api.sendMessage("❌ error content mamunp: " + err.message, threadID, messageID);
     }
   }
 };
