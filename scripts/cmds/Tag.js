@@ -1,16 +1,16 @@
 module.exports = {
   config: {
     name: "tag",
-    aliases: ["all", "everyone"],
+    aliases: [],
     category: "GROUP",
     role: 0,
-    author: "xalman",
+    author: "𝗧𝗠 ^〲𝗠𝗔𝗠𝗨𝗡ツ࿐ ⁰⁰⁷",
     countDown: 3,
     description: {
       en: "Tag by reply, name or tag all members"
     },
     guide: {
-      en: "{pm}tag [name] [msg]\n{pm}tag all [msg]\nReply + {pm}tag [msg]"
+      en: "{pn}tag [name] [msg]\n{pn}tag all [msg]\nReply + {pn}tag [msg]"
     }
   },
 
@@ -29,7 +29,8 @@ module.exports = {
 
       let tagUsers = [];
       let text = "";
-      
+
+      // 1. Reply kore tag
       if (messageReply) {
         const uid = messageReply.senderID;
         const name = await usersData.getName(uid);
@@ -37,11 +38,13 @@ module.exports = {
         text = args.join(" ");
       }
 
-      else if (args[0] && ["all", "cdi"].includes(args[0].toLowerCase())) {
+      // 2. All / everyone
+      else if (args[0] && ["all", "everyone", "cdi"].includes(args[0].toLowerCase())) {
         tagUsers = members;
         text = args.slice(1).join(" ");
       }
 
+      // 3. Name diye search
       else {
         if (!args[0]) {
           return api.sendMessage(
@@ -63,16 +66,26 @@ module.exports = {
         }
       }
 
-      const mentions = tagUsers.map(u => ({
-        tag: u.name,
-        id: u.id
-      }));
+      // Mentions create
+      const mentions = [];
+      let body = "";
 
-      const namesText = tagUsers.map(u => u.name).join(", ");
-      const body = text ? `${namesText}\n${text}` : namesText;
+      tagUsers.forEach((u, index) => {
+        body += `@${u.name}`;
+        if (index < tagUsers.length - 1) body += ", ";
+        mentions.push({
+          tag: `@${u.name}`,
+          id: u.id
+        });
+      });
+
+      if (text) body += `\n${text}`;
 
       api.sendMessage(
-        { body, mentions },
+        {
+          body: body,
+          mentions: mentions
+        },
         threadID,
         messageReply ? messageReply.messageID : messageID
       );
