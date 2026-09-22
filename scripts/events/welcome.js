@@ -1,7 +1,6 @@
 const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
-const { getPrefix } = global.utils;
 
 module.exports = {
   config: {
@@ -11,75 +10,91 @@ module.exports = {
     category: "events"
   },
 
-  onStart: async function ({ api, event, message }) {
+  onStart: async function ({ api, event, threadsData, usersData }) {
     if (event.logMessageType !== "log:subscribe") return;
 
     const { threadID, logMessageData } = event;
-    const { addedParticipants } = logMessageData;
-    const hours = new Date().getHours();
-    const prefix = getPrefix(threadID);
-    const nickNameBot = global.GoatBot.config.nickNameBot;
+    const botID = api.getCurrentUserID();
+    const newUser = logMessageData.addedParticipants[0];
+    const joinedUserID = newUser?.userFbId;
+    const joinedUserName = newUser?.fullName;
 
-    // Bot nick set function
-    if (addedParticipants.some(user => user.userFbId === api.getCurrentUserID())) {
-      if (nickNameBot) {
-        try {
-          await api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
-        } catch (error) {
-          console.error("❌ Error changing bot nickname:", error);
-        }
-      }
-      // Return early when bot is added
-      return;
+    if (!joinedUserID || joinedUserID === botID) return;
+
+    let groupName, memberCount, gcImgUrl, adderName;
+    const adderUID = event.author;
+
+    try {
+      await threadsData.refreshInfo(threadID);
+      const info = await threadsData.get(threadID);
+
+      groupName = info.threadName || "Unnamed Group";
+      memberCount = info.members?.length || 1;
+
+      gcImgUrl =
+        info.imageSrc ||
+        `https://graph.facebook.com/${threadID}/picture?width=720&height=720`;
+
+      adderName = await usersData.getName(adderUID);
+    } catch {
+      groupName = "Unnamed Group";
+      memberCount = 1;
+      adderName = "Admin";
+      gcImgUrl = `https://graph.facebook.com/${threadID}/picture?width=720&height=720`;
     }
 
-    // Original welcome code for new users
-    const botID = api.getCurrentUserID();
-    
-    if (addedParticipants.some(u => u.userFbId === botID)) return;
+    const timeStr = new Date().toLocaleString("en-BD", {
+      timeZone: "Asia/Dhaka",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      weekday: "long",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour12: true
+    });
 
-    const threadInfo = await api.getThreadInfo(threadID);
-    const groupName = threadInfo.threadName;
-    const memberCount = threadInfo.participantIDs.length;
+    const apiUrl =
+      `https://xsaim8x-xxx-api.onrender.com/api/welcome2?` +
+      `name=${encodeURIComponent(joinedUserName)}` +
+      `&uid=${joinedUserID}` +
+      `&threadname=${encodeURIComponent(groupName)}` +
+      `&members=${memberCount}` +
+      `&gcimg=${encodeURIComponent(gcImgUrl)}` +
+      `&addername=${encodeURIComponent(adderName)}` +
+      `&adderuid=${adderUID}`;
 
-    for (const user of addedParticipants) {
-      const userId = user.userFbId;
-      const fullName = user.fullName;
+    try {
+      const tmpDir = path.join(__dirname, "..", "cache");
+      await fs.ensureDir(tmpDir);
 
-      try {
-        
-        const timeStr = new Date().toLocaleString("en-BD", {
-          timeZone: "Asia/Dhaka",
-          hour: "2-digit", minute: "2-digit", second: "2-digit",
-          weekday: "long", year: "numeric", month: "2-digit", day: "2-digit",
-          hour12: true,
-        });
+      const imgPath = path.join(tmpDir, `welcome2_${joinedUserID}.png`);
+      const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-    
-        const apiUrl = `https://xsaim8x-xxx-api.onrender.com/api/welcome?name=${encodeURIComponent(fullName)}&uid=${userId}&threadname=${encodeURIComponent(groupName)}&members=${memberCount}`;
-        const tmp = path.join(__dirname, "..", "cache");
-        await fs.ensureDir(tmp);
-        const imagePath = path.join(tmp, `welcome_${userId}.png`);
+      fs.writeFileSync(imgPath, response.data);
 
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-        fs.writeFileSync(imagePath, response.data);
-
-        await api.sendMessage({
+      await api.sendMessage(
+        {
           body:
-            `‎𝐇𝐞𝐥𝐥𝐨 ${fullName}\n` +
+            `‎𝐇𝐞𝐥𝐥𝐨 ${joinedUserName}\n` +
             `𝐖𝐞𝐥𝐜𝐨𝐦𝐞 𝐭𝐨 ${groupName}\n` +
             `𝐘𝐨𝐮'𝐫𝐞 𝐭𝐡𝐞 ${memberCount} 𝐦𝐞𝐦𝐛𝐞𝐫 𝐨𝐧 𝐭𝐡𝐢𝐬 𝐠𝐫𝐨𝐮𝐩, 𝐩𝐥𝐞𝐚𝐬𝐞 𝐞𝐧𝐣𝐨𝐲 🎉\n` +
+            `➕ 𝐀𝐝𝐝𝐞𝐝 𝐛𝐲 : ${adderName}\n` +
             `━━━━━━━━━━━━━━━━\n` +
             `📅 ${timeStr}`,
-          attachment: fs.createReadStream(imagePath),
-          mentions: [{ tag: fullName, id: userId }]
-        }, threadID);
+          attachment: fs.createReadStream(imgPath),
+          mentions: [
+            { tag: joinedUserName, id: joinedUserID },
+            { tag: adderName, id: adderUID }
+          ]
+        },
+        threadID
+      );
 
-        fs.unlinkSync(imagePath);
-
-      } catch (err) {
-        console.error("❌ Error sending welcome message:", err);
-      }
+      fs.unlinkSync(imgPath);
+    } catch (err) {
+      console.error("Welcome API Error:", err.message || err);
     }
   }
 };
