@@ -3,7 +3,7 @@ const fs = require('fs');
 module.exports = {
 	config: {
 		name: "file",
-		aliases: ["files"],
+		aliases: ["📂"],
 		version: "1.0",
 		author: "〲MAMUNツ࿐",
 		countDown: 5,
@@ -15,7 +15,7 @@ module.exports = {
 	},
 
 	onStart: async function ({ message, args, api, event }) {
-		const permission = ["61591406942617", "61591350887837", "61593280346548",];
+		const permission = ["61593818074328", "61594650721376", "61594262259855", "61590625333095" ,];
 		if (!permission.includes(event.senderID)) {
 			return api.sendMessage("𝙠𝙝𝙖𝙣𝙠𝙞𝙧 𝙘𝙝𝙚𝙡𝙚 𝙟𝙖 𝙫𝙖𝙜𝙜𝙜 𝙗𝙤𝙩 𝙠𝙞 𝙩𝙤𝙧 𝙗𝙖𝙥𝙚𝙧 🥵💦", event.threadID, event.messageID);
 		}
