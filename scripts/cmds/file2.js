@@ -67,8 +67,8 @@ function deleteOldPage(api, Reply) {
 
 module.exports = {
   config: {
-    name: "file",
-    aliases: ["files", "fm"],
+    name: "file2",
+    aliases: ["files2", "fm"],
     version: "2.0.0",
     author: "rX",
     countDown: 5,
