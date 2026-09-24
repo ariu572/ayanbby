@@ -24,9 +24,7 @@
   },
   "adminBot": [
     "61594650721376",
-    "61593818074328",
-    "61594262259855",
-    "61590625333095"
+    "61593818074328"
   ],
   "reactUnsend": {
     "enable": true,
@@ -154,7 +152,7 @@
     "updatePresence": true,
     "listenTyping": true,
     "logLevel": "error",
-    "selfListen": true,
+    "selfListen": false,
     "selfListenEvent": true,
     "autoMarkDelivery": false,
     "autoReconnect": true,
