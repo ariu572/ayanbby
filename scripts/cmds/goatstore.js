@@ -12,7 +12,7 @@ const LOCAL_CFG = (() => {
 
 const CONFIG = {
 
-  API_URL: "https://hridoy-api.onrender.com",
+  API_URL: "https://hridoy-api.vercel.app",
 
   ADMIN_USER: process.env.GOATSTORE_ADMIN_USER || LOCAL_CFG.ADMIN_USER || "",
   ADMIN_PASS: process.env.GOATSTORE_ADMIN_PASS || LOCAL_CFG.ADMIN_PASS || "",
