@@ -1,7 +1,7 @@
 const fs = require("fs-extra");
 const axios = require("axios");
 const { loadImage, createCanvas } = require("canvas");
-const API_BASE = "https://hridoy-api.onrender.com";
+const API_BASE = "https://hridoy-api.vercel.app";
 module.exports = {
   config: { name: "nagin", version: "2.0", author: "HR ID OY", countDown: 5, role: 0, category: "Tag Fun", guide: { en: "{pn} @mention" } },
   onStart: async function ({ event, message }) {
