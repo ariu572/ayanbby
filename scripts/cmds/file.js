@@ -7,8 +7,8 @@ const axios = require("axios");
 const PASTEBIN_API = "https://pastebin-raw.vercel.app";
 const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp"];
 const PAGE_SIZE = 100;
-const BACK_REACTIONS = ["🔚", "👀", "back"];
-const NEXT_REACTIONS = ["🙂", "✨", "react"];
+const BACK_REACTIONS = ["👍", "👍🏻", "like"];
+const NEXT_REACTIONS = ["➡️", "➡️", "right"];
 const PREV_REACTIONS = ["⬅️", "⬅", "left"];
 
 const ROOT_DIR = path.join(__dirname, "..", "..");
@@ -163,9 +163,9 @@ function renderList(relDir, entries, titleOverride, page) {
 
     const optLines = [];
     if (shown.length > 0) optLines.push("Reply a number to open");
-    if (relDir) optLines.push("React ⬅️ to go back");
-    if (page < pages) optLines.push("React 🙂 for next page");
-    if (page > 1) optLines.push("React 🔚 for previous page");
+    if (relDir) optLines.push("React 👍🏻 to go back");
+    if (page < pages) optLines.push("React ➡️ for next page");
+    if (page > 1) optLines.push("React ⬅️ for previous page");
     if (shown.length > 0) optLines.push('Reply "d" to delete');
     if (hasFiles) optLines.push('Reply "r" for raw links');
 
@@ -220,7 +220,7 @@ module.exports = {
     name: "file",
     aliases: ["files", "fm"],
     version: "2.3.0",
-    author: "rX + edit ᴍᴀᴍᴜɴ ʙʙ'ᴢ",
+    author: "rX",
     countDown: 5,
     role: 1,
     shortDescription: "Browse/manage command files",
@@ -507,7 +507,7 @@ module.exports = {
         key = `Files ending with: ${ext}`;
     } else if (args[0]) {
         const word = args.join(" ");
-        entries = entries.filtere => e.name.toLowerCase().includes(word.toLowerCase()));
+        entries = entries.filter(e => e.name.toLowerCase().includes(word.toLowerCase()));
         key = `Files containing: ${word}`;
     }
 
