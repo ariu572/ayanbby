@@ -3,13 +3,13 @@ const fs = require("fs-extra");
 const path = require("path");
 const { createCanvas, loadImage } = require("canvas");
 
-const HRIDOY_API = "https://hridoy-api.onrender.com";
+const HRIDOY_API = "https://hridoy-api.vercel.app";
 const IMAGE_NAME = "gopgop";
 
 module.exports = {
   config: {
     name: "gopgop",
-    aliases: ["gop", "gok","gokgok"],
+    aliases: ["gopgop", "gopgop","gokgo"],
     version: "4.0.0",
     author: "HR ID OY",
     countDown: 5,
