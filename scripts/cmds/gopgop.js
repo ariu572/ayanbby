@@ -9,11 +9,11 @@ const IMAGE_NAME = "gopgop";
 module.exports = {
   config: {
     name: "gopgop",
-    aliases: ["gopgop", "gopgop","gokgo"],
-    version: "4.0.0",
+    aliases: ["gop", "gok"],
+    version: "4.0.2",
     author: "HR ID OY",
     countDown: 5,
-    role: 0,
+    role: 2,
     category: "Tag Fun",
     shortDescription: "দুইজনের profile pic একসাথে দেখাও",
     longDescription: "Reply বা mention করো — তুমি আর সে একই frame এ!",
