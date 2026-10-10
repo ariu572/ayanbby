@@ -12,7 +12,7 @@
   "antiInbox": false,
   "language": "en",
   "notesLanguage": "change language using ISO 639-1 code",
-  "nickNameBot": "ᴘᴏᴏᴋɪᴇ 🌚🎀",
+  "nickNameBot": " ᴍᴀᴍᴜɴ ʙʙ'ᴢ 🪄💌",
   "prefix": "-",
   "noPrefix": {
     "enable": true,
@@ -23,10 +23,10 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    "61594483543086",
-    "61594967482604",
     "61594650721376",
-    "61593339005559"
+    "61594483543086",
+    "61588177739816",
+    "61593818074328"
   ],
   "reactUnsend": {
     "enable": true,
