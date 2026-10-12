@@ -1,115 +1,162 @@
 const { getStreamsFromAttachment } = global.utils;
-const moment = require("moment-timezone");
 
 module.exports = {
   config: {
     name: "notification",
     aliases: ["notify", "noti"],
-    version: "2.3",
-    author: "xalmam",
-    countDown: 5,
+    version: "3.1.1",
+    author: "MAMUN",
+    countDown: 10,
     role: 2,
-    shortDescription: {
-      en: "Send stylish notification with media to all groups"
-    },
-    longDescription: {
-      en: "Send notification (text, photo, video, audio, etc.) from admin to all groups with aesthetic style"
-    },
+    description: "Send a notification to all groups",
     category: "owner",
-    guide: { en: "{pn} <message or reply to media>" },
-    envConfig: { delayPerGroup: 300 }
-  },
-
-  langs: {
-    en: {
-      missingMessage: "Please enter a message or reply to a media file to send.",
-      sendingNotification: "📢 Sending notification to %1 groups...",
-      sentNotification: "✅ Successfully sent notification to %1 groups.",
-      errorSendingNotification: "⚠️ Error while sending to %1 groups:\n%2"
+    guide: {
+      en: "{pn} <message> or reply to a message with {pn}"
+    },
+    envConfig: {
+      delayPerGroup: 500
     }
   },
 
-  onStart: async function ({ message, api, event, args, commandName, envCommands, threadsData, getLang, usersData, config }) {
-    const { delayPerGroup } = envCommands[commandName];
+  onStart: async function ({ api, event, args, message }) {
     const senderID = event.senderID;
-    const senderName = await usersData.getName(senderID) || "Unknown User";
+    let senderName = "Unknown";
 
-    const now = moment().tz("Asia/Dhaka");
-    const timeString = now.format("hh:mm A");
-    const dateString = now.format("DD/MM/YYYY");
-
-    // Handle message text
-    const msgText = args.join(" ") || "";
-
-    // Collect attachments from message or reply
-    const attachments = [
-      ...(event.attachments || []),
-      ...(event.messageReply?.attachments || [])
-    ].filter(item => ["photo", "animated_image", "video", "audio", "sticker"].includes(item.type));
-
-    if (!msgText && attachments.length === 0)
-      return message.reply(getLang("missingMessage"));
-
-    let streamAttachments = [];
-    if (attachments.length > 0) {
-      try {
-        streamAttachments = await getStreamsFromAttachment(attachments);
-      } catch (err) {
-        console.error("Attachment processing error:", err);
-      }
+    try {
+      const info = await api.getUserInfo(senderID);
+      senderName = info?.[senderID]?.name || "Unknown";
+    } catch (error) {
+      // Keep default name
     }
 
-    
-    const owner = "×᷼×ＭＡ☂Ｍ☂ＵＮ☆"; 
-    const fb = "MA M UN Bb'z";
+    const msgText = args.join(" ").trim();
+    const attachments = [];
+    const seenAttachments = new Set();
 
-    
-    const formSend = {
-      body:
-`╭━━━〔 𝗡𝗢𝗧𝗜𝗙𝗜𝗖𝗔𝗧𝗜𝗢𝗡  〕━━━╮
-│ OWNER: ${owner}
-│MESSENGER: ${fb}
-╰━━━━━━━━━━━━━━━━━━━━━━╯
+    const addAttachments = (items = []) => {
+      for (const item of items) {
+        if (!item) continue;
 
-🕒 Time: ${timeString} - ${dateString}
+        const type = String(item.type || "").toLowerCase();
 
-─────────────────────────
+        if (
+          !["photo", "animated_image", "video", "audio", "sticker"].includes(type)
+        ) continue;
 
-${msgText || "(media only)"}
+        const key = item.url || item.ID || item.id;
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━╯`,
-      attachment: streamAttachments
+        if (key && seenAttachments.has(key)) continue;
+        if (key) seenAttachments.add(key);
+
+        attachments.push(item);
+      }
     };
 
-    // Get all active threads
-    const allThreads = (await threadsData.getAll()).filter(
-      t => t.isGroup && t.members.find(m => m.userID == api.getCurrentUserID())?.inGroup
-    );
+    addAttachments(event.attachments);
+    addAttachments(event.messageReply?.attachments);
 
-    message.reply(getLang("sendingNotification", allThreads.length));
-
-    let sent = 0;
-    const failed = [];
-
-    for (const thread of allThreads) {
-      try {
-        await api.sendMessage(formSend, thread.threadID);
-        sent++;
-      } catch (e) {
-        failed.push({ id: thread.threadID, err: e.message });
-      }
-      await new Promise(res => setTimeout(res, delayPerGroup));
+    if (!msgText && attachments.length === 0) {
+      return message.reply(
+        "❌ নোটিফিকেশন মেসেজ লিখো অথবা কোনো ছবি/ভিডিওতে reply দিয়ে কমান্ড দাও।\n\nউদাহরণ: -notification সবাই গ্রুপে অ্যাক্টিভ থাকো!"
+      );
     }
 
-    let report = "";
-    if (sent > 0) report += getLang("sentNotification", sent) + "\n";
-    if (failed.length > 0)
-      report += getLang(
-        "errorSendingNotification",
-        failed.length,
-        failed.map(f => `\n - ${f.err} [${f.id}]`).join("")
-      );
+    const notificationText = [
+      "🔔 𝗡𝗢𝗧𝗜𝗙𝗜𝗖𝗔𝗧𝗜𝗢𝗡 🔔",
+      "",
+      `👤 𝗦𝗘𝗡𝗧 𝗕𝗬: ${senderName}`,
+      "",
+      msgText || 
+    ].join("\n");
 
-    message.reply(report || "✅ All done!");
+    let attachmentStreams = [];
+
+    try {
+      if (attachments.length > 0) {
+        attachmentStreams = await getStreamsFromAttachment(attachments);
+      }
+    } catch (error) {
+      return message.reply(
+        `❌ Attachment লোড করা যায়নি: ${error.message}`
+      );
+    }
+
+    let threads;
+
+    try {
+      threads = await api.getThreadList(100, null, ["INBOX"]);
+    } catch (error) {
+      return message.reply(
+        `❌ গ্রুপ লিস্ট পাওয়া যায়নি: ${error.message}`
+      );
+    }
+
+    const groups = (threads || []).filter(thread => {
+      if (!thread || !thread.threadID) return false;
+      if (thread.isGroup === true) return true;
+      if (thread.isGroup === false) return false;
+
+      const members = thread.participantIDs || thread.participants || [];
+      return members.length > 2;
+    });
+
+    if (groups.length === 0) {
+      return message.reply("❌ কোনো গ্রুপ পাওয়া যায়নি।");
+    }
+
+    let sent = 0;
+    let failed = 0;
+    const errors = [];
+
+    const delay = Number(
+      global.GoatBot?.config?.commands?.notification?.delayPerGroup ??
+      module.exports.config.envConfig.delayPerGroup ??
+      500
+    );
+
+    for (const group of groups) {
+      try {
+        const payload = {
+          body: notificationText
+        };
+
+        if (attachmentStreams.length > 0) {
+          payload.attachment = attachmentStreams;
+        }
+
+        await new Promise((resolve, reject) => {
+          api.sendMessage(payload, group.threadID, error => {
+            if (error) reject(error);
+            else resolve();
+          });
+        });
+
+        sent++;
+      } catch (error) {
+        failed++;
+
+        if (errors.length < 15) {
+          errors.push(
+            `${group.threadID}: ${error.message || error}`
+          );
+        }
+      }
+
+      await new Promise(resolve =>
+        setTimeout(resolve, Math.max(0, delay))
+      );
+    }
+
+    let report =
+      `✅ Notification সম্পন্ন!\n\n` +
+      `📨 Sent: ${sent}\n` +
+      `❌ Failed: ${failed}\n` +
+      `👥 Total groups: ${groups.length}`;
+
+    if (errors.length > 0) {
+      report += `\n\n⚠️ কিছু error:\n${errors.join("\n")}`;
+    }
+
+    return message.reply(report);
   }
 };
