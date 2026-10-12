@@ -4,7 +4,7 @@ module.exports = {
   config: {
     name: "notification",
     aliases: ["notify", "noti"],
-    version: "3.1.1",
+    version: "3.1.2",
     author: "MAMUN",
     countDown: 10,
     role: 2,
@@ -25,9 +25,7 @@ module.exports = {
     try {
       const info = await api.getUserInfo(senderID);
       senderName = info?.[senderID]?.name || "Unknown";
-    } catch (error) {
-      // Keep default name
-    }
+    } catch (error) {}
 
     const msgText = args.join(" ").trim();
     const attachments = [];
@@ -66,8 +64,8 @@ module.exports = {
       "",
       `👤 𝗦𝗘𝗡𝗧 𝗕𝗬: ${senderName}`,
       "",
-      msgText || 
-    ].join("\n");
+      msgText
+    ].filter(Boolean).join("\n");
 
     let attachmentStreams = [];
 
@@ -108,10 +106,13 @@ module.exports = {
     let failed = 0;
     const errors = [];
 
-    const delay = Number(
-      global.GoatBot?.config?.commands?.notification?.delayPerGroup ??
-      module.exports.config.envConfig.delayPerGroup ??
-      500
+    const delay = Math.max(
+      0,
+      Number(
+        global.GoatBot?.config?.commands?.notification?.delayPerGroup ??
+        module.exports.config.envConfig.delayPerGroup ??
+        500
+      ) || 0
     );
 
     for (const group of groups) {
@@ -142,9 +143,7 @@ module.exports = {
         }
       }
 
-      await new Promise(resolve =>
-        setTimeout(resolve, Math.max(0, delay))
-      );
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
 
     let report =
