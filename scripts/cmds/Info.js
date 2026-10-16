@@ -24,8 +24,8 @@ module.exports = {
 
     // 👑 OWNER INFO
     const authorName = "×᷼×ＭＡＭＵＮ☆";
-    const ownAge = "21";
-    const messenger = "https://m.me/botxdi";
+    const ownAge = "21+";
+    const messenger = "https://m.me/xdi404";
     const authorFB = "Mohammad Mamun";
     const authorNumber = "+8801830981279";
     const status = "Single";
