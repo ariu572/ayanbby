@@ -15,10 +15,8 @@ module.exports = {
 
   onStart: async function ({ api, event, args }) {
     const OWNER_IDS = [
-      "61594650721376",
-      "61594483543086",
-      "61593818074328",
-      "61588177739816"
+      "61595057655929",
+      "61595489399118"
     ];
 
     if (!OWNER_IDS.includes(event.senderID)) {
