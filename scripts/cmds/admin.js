@@ -5,7 +5,7 @@ module.exports = {
 	config: {
 		name: "admin",
 		aliases: ["abal", "operator", "op"],
-		version: "3.1",
+		version: "3.3",
 		author: "〲MAMUNツ࿐ T.T o.O",
 		countDown: 5,
 		role: 0,
@@ -28,33 +28,33 @@ module.exports = {
 	langs: {
 		en: {
 			missingIdAdd:
-				"⚠️ 𝐏𝐋𝐄𝐀𝐒𝐄 𝐄𝐍𝐓𝐄𝐑 𝐔𝐈𝐃, 𝐓𝐀𝐆 𝐎𝐑 𝐑𝐄𝐏𝐋𝐘.",
+				"⚠️ ᴘʟᴇᴀꜱᴇ ᴇɴᴛᴇʀ ᴜɪᴅ, ᴛᴀɢ ᴏʀ ʀᴇᴘʟʏ.",
 
 			missingIdRemove:
-				"⚠️ 𝐏𝐋𝐄𝐀𝐒𝐄 𝐄𝐍𝐓𝐄𝐑 𝐔𝐈𝐃, 𝐓𝐀𝐆 𝐎𝐑 𝐑𝐄𝐏𝐋𝐘.",
+				"⚠️ ᴘʟᴇᴀꜱᴇ ᴇɴᴛᴇʀ ᴜɪᴅ, ᴛᴀɢ ᴏʀ ʀᴇᴘʟʏ.",
 
 			added:
-				"𝐀𝐃𝐃𝐄𝐃 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑𝐒\n" +
-				"━━━━━━━━━━━━━━━━\n" +
+				"✦ ᴀᴅᴅᴇᴅ ᴏᴘᴇʀᴀᴛᴏʀꜱ ✦\n" +
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
 				"%2\n" +
-				"━━━━━━━━━━━━━━━━\n" +
-				"𝐓𝐎𝐓𝐀𝐋 : %1",
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
+				"ᴛᴏᴛᴀʟ : %1",
 
 			alreadyAdmin:
-				"\n\n𝐀𝐋𝐑𝐄𝐀𝐃𝐘 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑\n" +
-				"━━━━━━━━━━━━━━━━\n" +
+				"\n\n✦ ᴀʟʀᴇᴀᴅʏ ᴏᴘᴇʀᴀᴛᴏʀ ✦\n" +
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
 				"%2",
 
 			removed:
-				"𝐑𝐄𝐌𝐎𝐕𝐄𝐃 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑𝐒\n" +
-				"━━━━━━━━━━━━━━━━\n" +
+				"✦ ʀᴇᴍᴏᴠᴇᴅ ᴏᴘᴇʀᴀᴛᴏʀꜱ ✦\n" +
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
 				"%2\n" +
-				"━━━━━━━━━━━━━━━━\n" +
-				"𝐓𝐎𝐓𝐀𝐋 : %1",
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
+				"ᴛᴏᴛᴀʟ : %1",
 
 			notAdmin:
-				"\n\n𝐍𝐎𝐓 𝐀𝐍 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑\n" +
-				"━━━━━━━━━━━━━━━━\n" +
+				"\n\n✦ ɴᴏᴛ ᴀɴ ᴏᴘᴇʀᴀᴛᴏʀ ✦\n" +
+				"┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n" +
 				"%2"
 		}
 	},
@@ -71,8 +71,8 @@ module.exports = {
 
 		// 👑 MAIN ADMIN
 		const OWNER = [
-	        "61595489399118",
-		 "61595057655929"
+			"61595489399118",
+			"61595057655929"
 		];
 
 		const isOwner = OWNER.includes(senderID);
@@ -124,7 +124,7 @@ module.exports = {
 
 			if (!isOwner) {
 				return message.reply(
-					"❌ 𝐎𝐍𝐋𝐘 𝐌𝐀𝐈𝐍 𝐀𝐃𝐌𝐈𝐍 𝐂𝐀𝐍 𝐀𝐃𝐃 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑."
+					"❌ ᴏɴʟʏ ᴍᴀɪɴ ᴀᴅᴍɪɴ ᴄᴀɴ ᴀᴅᴅ ᴏᴘᴇʀᴀᴛᴏʀ."
 				);
 			}
 
@@ -166,7 +166,7 @@ module.exports = {
 						name = "Unknown";
 					}
 
-					return `• 𝐍𝐀𝐌𝐄 : ${name}\n  𝐔𝐈𝐃 : ${uid}`;
+					return `• ɴᴀᴍᴇ : ${name}\n  ᴜɪᴅ  : ${uid}`;
 				})
 			);
 
@@ -181,7 +181,7 @@ module.exports = {
 						name = "Unknown";
 					}
 
-					return `• 𝐍𝐀𝐌𝐄 : ${name}\n  𝐔𝐈𝐃 : ${uid}`;
+					return `• ɴᴀᴍᴇ : ${name}\n  ᴜɪᴅ  : ${uid}`;
 				})
 			);
 
@@ -220,7 +220,7 @@ module.exports = {
 
 			if (!isOwner) {
 				return message.reply(
-					"❌ 𝐎𝐍𝐋𝐘 𝐌𝐀𝐈𝐍 𝐀𝐃𝐌𝐈𝐍 𝐂𝐀𝐍 𝐑𝐄𝐌𝐎𝐕𝐄 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑."
+					"❌ ᴏɴʟʏ ᴍᴀɪɴ ᴀᴅᴍɪɴ ᴄᴀɴ ʀᴇᴍᴏᴠᴇ ᴏᴘᴇʀᴀᴛᴏʀ."
 				);
 			}
 
@@ -264,7 +264,7 @@ module.exports = {
 						name = "Unknown";
 					}
 
-					return `• 𝐍𝐀𝐌𝐄 : ${name}\n  𝐔𝐈𝐃 : ${uid}`;
+					return `• ɴᴀᴍᴇ : ${name}\n  ᴜɪᴅ  : ${uid}`;
 				})
 			);
 
@@ -279,7 +279,7 @@ module.exports = {
 						name = "Unknown";
 					}
 
-					return `• 𝐍𝐀𝐌𝐄 : ${name}\n  𝐔𝐈𝐃 : ${uid}`;
+					return `• ɴᴀᴍᴇ : ${name}\n  ᴜɪᴅ  : ${uid}`;
 				})
 			);
 
@@ -308,7 +308,7 @@ module.exports = {
 		}
 
 		// ═══════════════════════════════
-		// 📋 VIP ADMIN LIST
+		// 📋 ADMIN LIST
 		// ═══════════════════════════════
 
 		if (
@@ -334,26 +334,22 @@ module.exports = {
 				})
 			);
 
+			const numberEmojis = ["➊", "➋", "➌", "➍", "➎", "➏", "➐", "➑", "➒", "➓"];
+
 			const operatorList =
 				getNames.length > 0
 					? getNames
 						.map(
 							(i, index) =>
-								`   ${index + 1}️⃣ 👑 𝐍𝐀𝐌𝐄 : ${i.name}\n` +
-								`       🆔 𝐔𝐈𝐃 : ${i.uid}`
+								`${numberEmojis[index] || (index + 1)}  ${i.name}\n` +
+								`    ╰┈➤ ${i.uid}`
 						)
 						.join("\n\n")
-					: "   ❌ 𝐍𝐎 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑𝐒 𝐅𝐎𝐔𝐍𝐃";
+					: "   ❌ ɴᴏ ᴏᴘᴇʀᴀᴛᴏʀꜱ ꜰᴏᴜɴᴅ";
 
 			const list =
-`(⁠✪ 𝐌𝐀𝐈𝐍 𝐀𝐃𝐌𝐈𝐍 ✪⁠)
-
-^⁠_𝐌_𝐀_𝐌_𝐔_𝐍⁠_⁠^ 𝐁𝐁'𝐙
-
- ${OWNER.join(" • ")}
-
-⚡ 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑𝐒
-
+`✦ ᴀᴅᴍɪɴ ʟɪꜱᴛ ✦
+┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 ${operatorList}`;
 
 			return message.reply(list);
@@ -369,7 +365,7 @@ ${operatorList}`;
 
 			if (!uid || !/^\d+$/.test(uid)) {
 				return message.reply(
-					"⚠️ 𝐔𝐒𝐀𝐆𝐄 : 𝐀𝐃𝐌𝐈𝐍 𝐂𝐇𝐄𝐂𝐊 <𝐔𝐈𝐃>"
+					"⚠️ ᴜꜱᴀɢᴇ : ᴀᴅᴍɪɴ ᴄʜᴇᴄᴋ <ᴜɪᴅ>"
 				);
 			}
 
@@ -384,25 +380,25 @@ ${operatorList}`;
 			if (OWNER.includes(uid)) {
 
 				return message.reply(
-					`👑 𝐍𝐀𝐌𝐄 : ${name}\n` +
-					`🆔 𝐔𝐈𝐃 : ${uid}\n` +
-					`𝐑𝐎𝐋𝐄 : 𝐌𝐀𝐈𝐍 𝐎𝐖𝐍𝐄𝐑`
+					`👑 ɴᴀᴍᴇ : ${name}\n` +
+					`ᴜɪᴅ  : ${uid}\n` +
+					`ʀᴏʟᴇ : ᴍᴀɪɴ ᴏᴡɴᴇʀ`
 				);
 			}
 
 			if (config.adminBot.includes(uid)) {
 
 				return message.reply(
-					`⚡ 𝐍𝐀𝐌𝐄 : ${name}\n` +
-					`🆔 𝐔𝐈𝐃 : ${uid}\n` +
-					`𝐑𝐎𝐋𝐄 : 𝐎𝐏𝐄𝐑𝐀𝐓𝐎𝐑`
+					`⚡ ɴᴀᴍᴇ : ${name}\n` +
+					`ᴜɪᴅ  : ${uid}\n` +
+					`ʀᴏʟᴇ : ᴏᴘᴇʀᴀᴛᴏʀ`
 				);
 			}
 
 			return message.reply(
-				`❌ 𝐍𝐀𝐌𝐄 : ${name}\n` +
-				`🆔 𝐔𝐈𝐃 : ${uid}\n` +
-				`𝐑𝐎𝐋𝐄 : 𝐔𝐒𝐄𝐑`
+				`❌ ɴᴀᴍᴇ : ${name}\n` +
+				`ᴜɪᴅ  : ${uid}\n` +
+				`ʀᴏʟᴇ : ᴜꜱᴇʀ`
 			);
 		}
 
