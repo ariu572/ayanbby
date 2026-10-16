@@ -15,10 +15,8 @@ onStart: async function () {},
 onChat: async function ({ event, message, api }) {
 try {
 const adminIDs = [
-"61594650721376",
-"61594483543086",
-"61593818074328",
-"61588177739816"
+"61595489399118",
+"61595057655929"
 ];
 
   if (!event || !event.senderID) return;
