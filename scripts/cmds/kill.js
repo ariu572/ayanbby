@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
 const { createCanvas, loadImage } = require("canvas");
-const API_BASE = "https://hridoy-api.onrender.com";
+const API_BASE = "https://hridoy-api.vercel.app";
 module.exports = {
   config: { name: "kill", aliases: ["killed"], version: "2.0", author: "HR ID OY", role: 0, countDown: 5, category: "FUN & SOCIAL", guide: { en: "{pn} @mention | reply | uid" } },
   onStart: async function ({ api, event, message, usersData }) {
