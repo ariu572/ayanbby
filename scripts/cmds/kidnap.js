@@ -2,7 +2,7 @@ const fs = require("fs-extra");
 const Canvas = require("canvas");
 const path = require("path");
 const axios = require("axios");
-const API_BASE = "https://hridoy-api.onrender.com";
+const API_BASE = "https://hridoy-api.vercel.app";
 module.exports = {
   config: { name: "kidnap", aliases: ["kdnp"], version: "2.0", author: "HR ID OY", role: 0, countDown: 5, shortDescription: "Make a kidnap-style image", category: "Tag Fun", guide: { en: "{pn} @mention | reply" } },
   onStart: async function ({ api, event, message, usersData }) {
