@@ -3,7 +3,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const { createCanvas, loadImage } = require("canvas");
 
-const API_BASE = "https://hridoy-api.onrender.com";
+const API_BASE = "https://hridoy-api.vercel.app";
 const CMD_NAME = "arrest";
 
 module.exports = {
