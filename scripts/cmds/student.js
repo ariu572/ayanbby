@@ -1,7 +1,7 @@
 const axios = require("axios");
 const fs = require("fs-extra");
 const { loadImage, createCanvas } = require("canvas");
-const API_BASE = "https://hridoy-api.onrender.com";
+const API_BASE = "https://hridoy-api.vercel.app";
 module.exports = {
   config: { name: "student", version: "2.0", author: "HR ID OY", countDown: 5, role: 0, category: "Memes", guide: { en: "{pn} [text]" } },
   wrapText: async (ctx, text, maxWidth) => {
