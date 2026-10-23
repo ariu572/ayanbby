@@ -8,7 +8,7 @@ module.exports = {
     name: "murgi",
     version: "1.1.0",
     role: 2,
-    author: "Akash Edit",
+    author: "⎯͢⎯⃝𝐌𝐚𝐦𝐮𝐧࿐ 모🌼💗⎯͢♡︎*",
     description: "Loop bad word messages until stopped",
     category: "fun",
     usages: "@mention | off",
@@ -20,15 +20,15 @@ module.exports = {
     if (args[0] && args[0].toLowerCase() === "off") {
       if (activeMurgi.has(event.threadID)) {
         activeMurgi.set(event.threadID, false);
-        return message.reply("🛑 Murgi mode stopped.");
+        return message.reply("ওকে বস খানকীর পোলা কে ছুদা শেষ ☠️💦");
       } else {
-        return message.reply("⚠️ Murgi mode is not running.");
+        return message.reply("বস এখনো কাউকে ছুদি নাই তো ☠️👄");
       }
     }
 
     const mention = Object.keys(event.mentions)[0];
     if (!mention) {
-      return message.reply("Please @mention a target first!");
+      return message.reply("বস কোন খানকীর পোলা কে ছুদবো আপনি শুধু ম্যানশন দেন 😐🙏");
     }
 
     const name = event.mentions[mention];
@@ -79,7 +79,7 @@ module.exports = {
     ];
 
     activeMurgi.set(event.threadID, true);
-    message.reply("🔥 Murgi mode started.");
+    message.reply("নে খা chuda 😒🔪");
 
     try {
       while (activeMurgi.get(event.threadID)) {
