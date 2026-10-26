@@ -30,13 +30,13 @@ module.exports = {
   𝗢𝗪𝗡𝗘𝗥 𝗣𝗥𝗢𝗙𝗜𝗟𝗘 
 ╚═════════╝
 ╭──────────⭓
-│💌𝗡𝗮𝗺𝗲 :    亗•𝘔𝘈𝘔𝘜𝘕✿᭄
+│💌𝗡𝗮𝗺𝗲 :    —͟͞AriY'an
 │🧸𝗡𝗶𝗰𝗸      :  Vondo
-│🔮 𝗔𝗴𝗲       : 20
-│🖤 𝗦𝘁𝗮𝘁𝘂𝘀   :  Single
+│🔮 𝗔𝗴𝗲       : 21+
+│Ur owner     : KG ADDA VIBES 
 │✡️ 𝗣𝗿𝗼𝗳𝗲𝘀𝘀𝗶𝗼𝗻 :  Student
  | 🚸𝗘𝗱𝘂𝗰𝗮𝘁𝗶𝗼𝗻 :   Inter 2nd Year
-│🔶 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻  :  Khulna
+│🔶 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻  :  DHAKA
 ╰──────────⭓
 ╭─────────⭓
  |🆙  ${hours}h ${minutes}m ${seconds}s
@@ -45,7 +45,7 @@ module.exports = {
 ╰─────────⭓
 ╭──────────⭓
 │💠 WhatsApp
-│🆔  wa.me/01830981279
+│🆔  wa.me/01704471566
 ╰──────────⭓
 `;
 
@@ -54,7 +54,7 @@ module.exports = {
 
 		fs.ensureDirSync(cacheFolder);
 
-		const imageUrl = "https://i.imgur.com/g0GpgfG.jpeg";
+		const imageUrl = "https://i.imgur.com/Zj9cMym.jpeg";
 
 		request(imageUrl)
 			.pipe(fs.createWriteStream(imagePath))
