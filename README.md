@@ -55,15 +55,13 @@
 ### 📊 GitHub Analytics
 
 <p align="center">
-  <img height="180" src="https://github-readme-stats.vercel.app/api?username=MAMUN-GOAT-BOT&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true"/>
-  <img height="180" src="https://github-readme-stats.vercel.app/api/top-langs/?username=MAMUN-GOAT-BOT&layout=compact&theme=tokyonight&hide_border=true"/>
+  <img height="180" src="https://github-readme-stats.vercel.app/api?username=mamunx69&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true"/>
+  <img height="180" src="https://github-readme-stats.vercel.app/api/top-langs/?username=mamunx69&layout=compact&theme=tokyonight&hide_border=true"/>
 </p>
 
 <p align="center">
-  <img src="https://komarev.com/ghpvc/?username=MAMUN-GOAT-BOT&label=PROFILE+VIEWS&color=654ea3&style=for-the-badge"/>
+  <img src="https://komarev.com/ghpvc/?username=mamunx69&label=PROFILE+VIEWS&color=654ea3&style=for-the-badge"/>
 </p>
-
----
 
 ### 🎥 Featured Tutorial
 
