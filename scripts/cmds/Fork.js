@@ -17,10 +17,11 @@ module.exports = {
  current: `
 🌐 𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 𝗚𝗜𝗧𝗛𝗨𝗕
 🔗 https://github.com/mamunx69/Goat-bot-v3.git
-━━━━━━━━━━━━━
-🎥 𝗩𝗜𝗗𝗘𝗢 𝗧𝗨𝗧𝗢𝗥𝗜𝗔𝗟 📺 https://youtu.be/_Qb7Pq0Xavs?si=-MaOtPPnBPVSbIFX
+━━━━━━━━━━━━
+🎥 𝗩𝗜𝗗𝗘𝗢 𝗧𝗨𝗧𝗢𝗥𝗜𝗔𝗟 
+📺 https://youtu.be/_Qb7Pq0Xavs?si=-MaOtPPnBPVSbIFX
 
-✦━━━━━━━━━━━✦
+✦━━━━━━━━━━✦
 `
  }
  },
