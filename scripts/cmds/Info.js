@@ -23,12 +23,12 @@ module.exports = {
   onStart: async function ({ message }) {
 
     // 👑 OWNER INFO
-    const authorName = "×᷼×ＭＡＭＵＮ☆";
+    const authorName = "AriYa'N bbz";
     const ownAge = "21+";
-    const messenger = "https://m.me/xdi404";
-    const authorFB = "Mohammad Mamun";
-    const authorNumber = "+8801830981279";
-    const status = "Single";
+    const messenger = "https://m.me/aruuhbbz";
+    const authorFB = "Ariyan bbz";
+    const authorNumber = "+8801704471566";
+    const status = "Married";
 
     // 🇧🇩 BANGLADESH TIME
     const now = moment().tz("Asia/Dhaka");
@@ -46,7 +46,7 @@ module.exports = {
       `${days}d • ${hours}h • ${minutes}m • ${seconds}s`;
 
     const botName =
-      global.GoatBot?.config?.nickNameBot || "⏤͟͟͞͞ ☻ 𝗬𝗢𝗨𝗥 𝗕𝗕𝗭 💌";
+      global.GoatBot?.config?.nickNameBot || "⏤͟͟͞͞ ☻—͟͞𝖲𝗂𝗓𝗎𝗄𝖺 —͟͞𝖻𝖻'𝗓🎀✨";
 
     const prefix =
       global.GoatBot?.config?.prefix || ".";
