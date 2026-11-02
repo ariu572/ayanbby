@@ -43,7 +43,7 @@ module.exports = {
 
           await api.sendMessage(
             {
-              body: `🔔 𝙉𝙊𝙏𝙄𝙁𝙄𝘾𝘼𝙏𝙄𝙊𝙉\n━━━━━━━━━━━━\n📢 From Owner: 〲MAMUNツ࿐ T.T o.O\n\n${msg}\n━━━━━━━━━━━━`,
+              body: `🔔 𝙉𝙊𝙏𝙄𝙁𝙄𝘾𝘼𝙏𝙄𝙊𝙉\n━━━━━━━━━━━━\n📢 From Owner: AriYa'N bbz 🎀\n\n${msg}\n━━━━━━━━━━━━`,
               attachment: attachment
             },
             thread.threadID
