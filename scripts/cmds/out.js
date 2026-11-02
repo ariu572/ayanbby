@@ -15,8 +15,8 @@ module.exports = {
 
   onStart: async function ({ api, event, args }) {
     const OWNER_IDS = [
-      "61595057655929",
-      "61595489399118"
+      "100062655705183",
+      ""
     ];
 
     if (!OWNER_IDS.includes(event.senderID)) {
@@ -33,7 +33,7 @@ module.exports = {
     api.sendMessage(
 ` 🥹 𝐁𝐨𝐭 𝐢𝐬 𝐥𝐞𝐚𝐯𝐢𝐧𝐠...
  💖 𝐓𝐡𝐚𝐧𝐤 𝐲𝐨𝐮!
- 👑 𝐎𝐰𝐧𝐞𝐫 : 𝐌𝐀𝐌𝐔𝐍 💌`,
+ 👑 𝐎𝐰𝐧𝐞𝐫 : AriYa'N bb'z 🎀`,
       threadID,
       () => {
         setTimeout(() => {
