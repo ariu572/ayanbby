@@ -31,7 +31,7 @@
   },
   "adminBot": [
     "100062655705183",
-    "",
+    "61596442316778",
     ""  
   ],
   "reactUnsend": {
@@ -47,7 +47,7 @@
     "enable": false,
     "whiteListIds": [
       "100062655705183",
-      ""
+      "61596442316778"
     ],
     "notes": "If enabled, only IDs in whiteListIds can use the bot."
   },
@@ -159,7 +159,7 @@
     "updatePresence": true,
     "listenTyping": true,
     "logLevel": "error",
-    "selfListen": false,
+    "selfListen": true,
     "selfListenEvent": true,
     "autoMarkDelivery": false,
     "autoReconnect": true,
